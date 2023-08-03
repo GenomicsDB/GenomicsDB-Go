@@ -35,7 +35,7 @@ import "C"
 import (
 	"log"
 
-	"github.com/datma-health/GenomicsDB-Go/protobuf"
+	"github.com/GenomicsDB/GenomicsDB-Go/protobuf"
 
 	"google.golang.org/protobuf/proto"
 )
