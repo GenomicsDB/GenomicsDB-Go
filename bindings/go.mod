@@ -1,4 +1,4 @@
-module github.com/GenomicsDB/GenomicsDB-Go
+module github.com/GenomicsDB/GenomicsDB-Go/bindings
 
 go 1.20
 
