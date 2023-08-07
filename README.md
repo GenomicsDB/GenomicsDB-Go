@@ -12,5 +12,5 @@ This step is required to install native genomicsdb if it is not available.
 - go get -u github.com/GenomicsDB/GenomicsDB-Go/bindings
 
 ## For release
-`GenomicsDB-Go/bindings` and `GenomicsDB-Go/install_genomicsdb` are separate modules, so both bindings and install_genomicsdb folders have to be tagged separately. For example, create `bindings/v0.0.1` and `install_genomicsdb/v0.0.2` to get the steps for users outlined above to work.
+`GenomicsDB-Go/bindings` and `GenomicsDB-Go/install_genomicsdb` are separate modules, so both bindings and install_genomicsdb folders have to be tagged separately. For example, create `bindings/v0.0.1` and `install_genomicsdb/v0.0.1` to get the steps for users outlined above to work. Note: If only one of the modules is updated, bump the version only associated with that module.
 
