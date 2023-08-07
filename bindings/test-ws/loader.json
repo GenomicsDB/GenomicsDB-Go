@@ -1,0 +1,21 @@
+{
+ "column_partitions": [
+  {
+   "begin": {
+    "tiledb_column": 0
+   },
+   "workspace": "/Users/nalini/GenomicsDB/tests/inputs/vcfs/1/test-ws",
+   "array_name": "allcontigs$1$3101976562",
+   "end": {
+    "tiledb_column": 3101976561
+   }
+  }
+ ],
+ "vid_mapping_file": "/Users/nalini/GenomicsDB/tests/inputs/vcfs/1/test-ws/vidmap.json",
+ "callset_mapping_file": "/Users/nalini/GenomicsDB/tests/inputs/vcfs/1/test-ws/callset.json",
+ "size_per_column_partition": 43581440,
+ "segment_size": 1048576,
+ "num_cells_per_tile": 1000,
+ "consolidate_tiledb_array_after_load": false,
+ "enable_shared_posixfs_optimizations": false
+}

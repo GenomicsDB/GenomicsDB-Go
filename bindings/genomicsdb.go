@@ -33,10 +33,10 @@ package bindings
 import "C"
 
 import (
-	"log"
+	"fmt"
+	"path/filepath"
 
 	"github.com/GenomicsDB/GenomicsDB-Go/bindings/protobuf"
-
 	"google.golang.org/protobuf/proto"
 )
 
@@ -48,31 +48,48 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
-func Query() {
-	// Construct protobuf
-	export_config := protobuf.ExportConfiguration{
-		Workspace: ptr("/Users/nalini/genomicsdb_demo/ws"),
-		Array:     &protobuf.ExportConfiguration_ArrayName{ArrayName: "allcontigs$1$3095677412"},
-		VidMappingInfo: &protobuf.ExportConfiguration_VidMappingFile{
-			VidMappingFile: "/Users/nalini/genomicsdb_demo/ws/vidmap.json"},
-		CallsetMappingInfo: &protobuf.ExportConfiguration_CallsetMappingFile{
-			CallsetMappingFile: "/Users/nalini/genomicsdb_demo/ws/callset.json",
-		},
-		QueryContigIntervals: []*protobuf.ContigInterval{
-			{Contig: ptr("17"), Begin: ptr(int64(7571719)), End: ptr(int64(7590868))},
-		},
-		QueryRowRanges: []*protobuf.RowRangeList{
-			{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(200000))}}},
-		},
-		Attributes:                       []string{"REF", "ALT", "GT"},
-		QueryFilter:                      ptr("REF==\"A\" && ALT|=\"T\" && GT&=\"1/1\""),
-		BypassIntersectingIntervalsPhase: ptr(true),
-		EnableSharedPosixfsOptimizations: ptr(true),
+type GenomicsDBQueryConfig struct {
+	Workspace       string
+	Array           string
+	ContigIntervals []*protobuf.ContigInterval
+	RowRanges       []*protobuf.RowRangeList
+	Attributes      []string
+	Filter          string
+}
+
+func Query(queryConfig GenomicsDBQueryConfig) (bool, string) {
+	// Construct export config protobuf
+	var exportConfig protobuf.ExportConfiguration
+
+	exportConfig.Workspace = ptr(queryConfig.Workspace)
+	exportConfig.Array = &protobuf.ExportConfiguration_ArrayName{ArrayName: queryConfig.Array}
+	exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{
+		VidMappingFile: filepath.Join(queryConfig.Workspace, "vidmap.json")}
+	exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
+		CallsetMappingFile: filepath.Join(queryConfig.Workspace, "callset.json"),
+	}
+	exportConfig.BypassIntersectingIntervalsPhase = ptr(true)
+	exportConfig.EnableSharedPosixfsOptimizations = ptr(true)
+
+	if queryConfig.ContigIntervals != nil {
+		exportConfig.QueryContigIntervals = queryConfig.ContigIntervals
 	}
 
-	data, err := proto.Marshal(&export_config)
+	if queryConfig.RowRanges != nil {
+		exportConfig.QueryRowRanges = queryConfig.RowRanges
+	}
+
+	if len(queryConfig.Attributes) > 0 {
+		exportConfig.Attributes = queryConfig.Attributes
+	}
+
+	if len(queryConfig.Filter) > 0 {
+		exportConfig.QueryFilter = ptr(queryConfig.Filter)
+	}
+
+	data, err := proto.Marshal(&exportConfig)
 	if err != nil {
-		log.Fatal("marshaling error: ", err)
+		return false, fmt.Sprintln("marshaling error: ", err)
 	}
 
 	len := C.size_t(C.int(len(data)))
@@ -81,7 +98,12 @@ func Query() {
 	cBuf := (*[1 << 30]byte)(p)
 	copy(cBuf[:], data)
 
-	genomicsdb_handle := C.connect(p, len)
+	var status C.status_t
+	genomicsdb_handle := C.connect(p, len, &status)
+	if status.succeeded == 0 || genomicsdb_handle == nil {
+		return false, fmt.Sprintln("Could not connect to GenomicsDB : ", C.GoString(&status.error_message[0]))
+	}
 	C.query_variant_calls(genomicsdb_handle)
 	C.disconnect(genomicsdb_handle)
+	return true, ""
 }

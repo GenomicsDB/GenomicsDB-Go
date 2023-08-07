@@ -44,6 +44,7 @@ class CountCellsProcessor : public GenomicsDBVariantCallProcessor {
                const int64_t* coordinates,
                const genomic_interval_t& genomic_interval,
                const std::vector<genomic_field_t>& genomic_fields) {
+    printf("Sample Name=%s\n", sample_name.c_str());
     m_count++;
   };
 
@@ -56,10 +57,17 @@ const char *version() {
   return version.c_str();
 }
 
-void *connect(void *pb_string, size_t len) {
+void *connect(void *pb_string, size_t len, status_t *status) {
   time_t start = time(0);
-  auto genomicsdb = new GenomicsDB(std::string((char *)pb_string, len), GenomicsDB::PROTOBUF_BINARY_STRING);
-  CountCellsProcessor count_cells_processor;
+  void *genomicsdb = 0;
+  try {
+    status->succeeded = 1;
+    genomicsdb = new GenomicsDB(std::string((char *)pb_string, len), GenomicsDB::PROTOBUF_BINARY_STRING);
+    CountCellsProcessor count_cells_processor;
+  } catch (const std::exception &e) {
+    status->succeeded = 0;
+    strncpy(&status->error_message[0], e.what(), PATH_MAX);
+  }
   printf("Connect time=%lus\n", time(0)-start);
   return genomicsdb;
 }
@@ -69,6 +77,7 @@ void query_variant_calls(void* genomicsdb_handle) {
   CountCellsProcessor count_cells_processor;
   ((GenomicsDB *)genomicsdb_handle)->query_variant_calls(count_cells_processor);
   printf("Query Variant Calls time=%lus\n", time(0)-start);
+  printf("Number of intervals=%d\n", count_cells_processor.m_intervals);
   printf("Count of cells=%d\n", count_cells_processor.m_count);
 }
 
