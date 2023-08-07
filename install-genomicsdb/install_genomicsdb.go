@@ -27,9 +27,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 
 	_ "embed"
 )
@@ -38,6 +40,8 @@ import (
 var script []byte
 
 func InstallNativeGenomicsDB() {
+	const GOOS string = runtime.GOOS
+
 	installScript, err := os.CreateTemp("", "install.sh")
 	if err != nil {
 		log.Fatal("Could not read embedded install.sh script: ", err)
@@ -58,11 +62,16 @@ func InstallNativeGenomicsDB() {
 		log.Fatal("Could not chmod install script: ", err)
 	}
 
-	cmd := &exec.Cmd{
-		Path:   installScript.Name(),
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
+	var cmd *exec.Cmd
+	ctx, _ := context.WithCancel(context.Background())
+	if GOOS == "darwin" || GOOS == "linux" {
+		cmd = exec.CommandContext(ctx, installScript.Name())
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		log.Fatal("Unsupported OS: ", GOOS)
 	}
+
 	if err = cmd.Start(); err != nil {
 		log.Fatal("Could not start install script from exec: ", err)
 	}

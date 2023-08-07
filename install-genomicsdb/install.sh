@@ -76,7 +76,11 @@ if [[ $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
 fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
-echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+if [[ $(uname) == "darwin" ]]; then
+  echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+else
+  echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+fi
 echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib/pkgconfig" >> genomicsdb.env
 
 echo "Installing GenomicsDB DONE"
