@@ -27,8 +27,11 @@
 package bindings
 
 import (
+	"os"
 	"strings"
 	"testing"
+
+	"github.com/GenomicsDB/GenomicsDB-Go/bindings/protobuf"
 )
 
 func TestGenomicsDBVersion(t *testing.T) {
@@ -37,6 +40,55 @@ func TestGenomicsDBVersion(t *testing.T) {
 	}
 }
 
+func createTestQueryConfig(workspace string, array string) GenomicsDBQueryConfig {
+	return GenomicsDBQueryConfig{
+		Workspace: workspace,
+		Array:     array,
+	}
+}
+
+func TestQueryNonExistentWorkspace(t *testing.T) {
+	succeeded, errMsg := Query(createTestQueryConfig("non-existent-ws", "non-existent-array"))
+	if succeeded {
+		t.Fatal("TestQueryNonExistentWorkspace should not succeed")
+	} else if len(errMsg) == 0 {
+		t.Fatal("TestQueryNonExistentWorkspace should return error message")
+	}
+	if len(errMsg) == 0 {
+		t.Fatal("No error message from failed Query")
+	}
+}
+
 func TestQuery(t *testing.T) {
-	Query()
+	config := createTestQueryConfig("test-ws", "allcontigs$1$3101976562")
+	config.ContigIntervals = []*protobuf.ContigInterval{
+		{Contig: ptr("1"), Begin: ptr(int64(1)), End: ptr(int64(20000))}}
+	config.RowRanges = []*protobuf.RowRangeList{
+		{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(2))}}}}
+	config.Attributes = []string{"GT", "DP"}
+	config.Filter = "REF == \"G\" && GT &= \"1/1\" && ALT |= \"T\""
+	succeeded, _ := Query(config)
+	if !succeeded {
+		t.Fatal("TestQuery failed")
+	}
+}
+
+func TestGenomicsDBDemoData(t *testing.T) {
+	genomicsDBDemoWS := os.Getenv("GENOMICSDB_DEMO_WS")
+	if len(genomicsDBDemoWS) > 0 {
+		config := createTestQueryConfig(genomicsDBDemoWS, "allcontigs$1$3095677412")
+		config.ContigIntervals = []*protobuf.ContigInterval{
+			{Contig: ptr("17"), Begin: ptr(int64(7571719)), End: ptr(int64(7590868))}}
+		config.RowRanges = []*protobuf.RowRangeList{
+			{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(200000))}}}}
+		config.Attributes = []string{"REF", "ALT", "GT"}
+		config.Filter = "REF==\"A\" && ALT|=\"T\" && GT&=\"1/1\""
+		succeeded, _ := Query(config)
+		if !succeeded {
+			t.Fatal("TestQuery failed")
+		}
+	} else {
+		t.Log("Skipping TestGenomicsDBDemoData. Set env GENOMICSDB_DEMO_WS to run this test")
+	}
+
 }

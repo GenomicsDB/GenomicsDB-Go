@@ -34,7 +34,13 @@ extern "C" {
 
   const char *version();
 
-  void *connect(void *pb_string, size_t len);
+#define PATH_MAX 4095
+  typedef struct status_t{
+    int succeeded;
+    char error_message[PATH_MAX+1];
+  } status_t;
+
+  void *connect(void *pb_string, size_t len, status_t *status);
 
   void query_variant_calls(void* genomicsdb_handle);
 
