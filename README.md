@@ -1,7 +1,8 @@
 # GenomicsDB-Go
-Experimental golang bindings to GenomicsDB
+Experimental golang bindings to the native [GenomicsDB](https://github.com/GenomicsDB/GenomicsDB) library. Only queries are supported for now. For importing vcf files into GenomicsDB, use the command line tools - `vcf2genomicsdb` or `gatk GenomicsDBImport`.
 
 ## For users
+Installation : Only Linux and MacOS are supported
 ### Step 1 optional
 This step is required to install native genomicsdb if it is not available. 
 - go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest
