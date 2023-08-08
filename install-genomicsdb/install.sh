@@ -30,8 +30,11 @@ GENOMICSDB_DIR=$(mktemp -d).GenomicsDB
 if [[ $CMAKE_INSTALL_PREFIX == "/usr/local" ]]; then
   SUDO="sudo"
 else
-  SUDO=
+  SUDO=""
 fi
+
+# Get absolute path for CMAKE_INSTALL_PREFIX
+CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" ./install)
 
 cleanup() {
   if [[ $1 -eq 1 ]]; then
@@ -71,7 +74,7 @@ echo "TOPLEVEL_GIT_DIR=$TOPLEVEL_GIT_DIR"
 if [[ $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
   # This script is from the git repository and we probably want to install protobuf go sources
   echo "Copying GenomicsDB protobuf go generated sources..."
-  cp -vf $CMAKE_INSTALL_PREFIX/genomicsdb/protobuf/go/* $PARENT_DIR/protobuf
+  cp -vf $CMAKE_INSTALL_PREFIX/genomicsdb/protobuf/go/* $PARENT_DIR/bindings/protobuf
   echo "Copying GenomicsDB protobuf go generated sources DONE"
 fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
