@@ -10,7 +10,7 @@ This step is required to install native genomicsdb if it is not available.
 - verify that $GOPATH is included in the $PATH environment variable
 - _go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest_
 - $GOPATH/bin/install-genomicsdb
-  - By default, the genomicsdb shared library is installed in `/usr/local` and may require `sudo` access. Set environment variable `GENOMICSDB_INSTALL_DIR` to any custom location before invoking `InstallGenomicsDB`.
+  - By default, the genomicsdb shared library is installed in `/usr/local` and may require `sudo` access. Set environment variable `GENOMICSDB_INSTALL_DIR` to any custom location before invoking `InstallGenomicsDB` for installing to locations other than `/usr/local`.
   - Generates a helper `genomicdb.env` file that exports `PKG_CONFIG_PATH` for building and `DYLD/LD_LIBRARY_PATH` for usage. This file can be sourced if the native GenomicsDB was installed in a custom location.
 ### Step 2 - Building
 - If a custom location was used for installing GenomicsDB in Step 1, set environment variable `PKG_CONFIG_PATH` to `$GENOMICSDB_INSTALL_DIR/lib/pkgconfig/genomicsdb.pc`
