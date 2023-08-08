@@ -65,7 +65,7 @@ func InstallNativeGenomicsDB() {
 	var cmd *exec.Cmd
 	ctx, _ := context.WithCancel(context.Background())
 	if GOOS == "darwin" || GOOS == "linux" {
-		cmd = exec.CommandContext(ctx, installScript.Name())
+		cmd = exec.CommandContext(ctx, "/bin/bash", installScript.Name())
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	} else {
