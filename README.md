@@ -21,9 +21,9 @@ If a custom location was used for installing GenomicsDB in Step 1, set environme
   
 ```bash
 #!/bin/bash
-mkdir example-go
-pushd example-go
-go mod init example/example-go
+mkdir example-genomicsdb-go
+pushd example-genomicsdb-go
+go mod init example/example-genomicsdb-go
 go get -u github.com/GenomicsDB/GenomicsDB-Go/bindings
 cat > main.go << EOF
 package main
@@ -38,8 +38,8 @@ func main() {
   log.Println("Got GenomicsDB version: ", gdb.GetVersion())
 }
 EOF
-git build
-git run .
+go build
+go run .
 popd
 ```
 
