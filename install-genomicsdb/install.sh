@@ -32,16 +32,23 @@ if [[ $CMAKE_INSTALL_PREFIX == "/usr/local" ]]; then
 else
   SUDO=""
 fi
+GENOMICSDB_NO_CLEAN=${GENOMICSDB_NO_CLEAN:false}
 
 # Get absolute path for CMAKE_INSTALL_PREFIX
-CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" ./install)
+CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" $CMAKE_INSTALL_PREFIX)
 
 cleanup() {
   if [[ $1 -eq 1 ]]; then
-    echo "Error encountered. Removing $GENOMICSDB_DIR..."
+    if [[ $GENOMICSDB_NO_CLEAN == true ]]; then
+      echo "*** Error encountered building workspace at $GENOMICSDB_DIR "
+    else
+      echo "*** Error encountered. Removing $GENOMICSDB_DIR..."
+    fi
   fi
-  rm -fr $GENOMICSDB_DIR
-  echo "Removing $GENOMICSDB_DIR DONE"
+  if [[ $GENOMICSDB_NO_CLEAN == false ]]; then
+    rm -fr $GENOMICSDB_DIR
+    echo "Removing $GENOMICSDB_DIR DONE"
+  fi
   exit $1
 }
 
