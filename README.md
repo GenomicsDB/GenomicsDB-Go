@@ -6,15 +6,15 @@ Installation : Only Linux and MacOS are supported
 ### Step 1 - Prerequisites
 This step is required to install native genomicsdb if it is not available.
 - system prerequisites for native genomicsdb are minimal, see [scripts](https://github.com/GenomicsDB/GenomicsDB/tree/master/scripts/prereqs/system) to install them if needed
-- go get github.com/golang/protobuf/protoc-gen-go
+- _go get github.com/golang/protobuf/protoc-gen-go_
 - verify that $GOPATH is included in the $PATH environment variable
-- go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest
+- _go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest_
 - $GOPATH/bin/install-genomicsdb
   - By default, the genomicsdb shared library is installed in `/usr/local` and may require `sudo` access. Set environment variable `GENOMICSDB_INSTALL_DIR` to any custom location before invoking `InstallGenomicsDB`.
   - Generates a helper `genomicdb.env` file that exports `PKG_CONFIG_PATH` for building and `DYLD/LD_LIBRARY_PATH` for usage. This file can be sourced if the native GenomicsDB was installed in a custom location.
 ### Step 2 - Building
 - If a custom location was used for installing GenomicsDB in Step 1, set environment variable `PKG_CONFIG_PATH` to `$GENOMICSDB_INSTALL_DIR/lib/pkgconfig/genomicsdb.pc`
-- go get -u github.com/GenomicsDB/GenomicsDB-Go/bindings
+- _go get -u github.com/GenomicsDB/GenomicsDB-Go/bindings_
 ### Step 3 - Usage
 - If a custom location was used for installing GenomicsDB in Step 1, set environment variable `DYLD_LIBRARY_PATH` for MacOS or `LD_LIBRARY_PATH` for Linux to include `$GENOMICSDB_INSTALL_DIR/lib`.
 
