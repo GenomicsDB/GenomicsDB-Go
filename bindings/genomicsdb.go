@@ -35,8 +35,11 @@ import "C"
 import (
 	"fmt"
 	"path/filepath"
+	"unsafe"
 
 	"github.com/GenomicsDB/GenomicsDB-Go/bindings/protobuf"
+	"github.com/go-gota/gota/dataframe"
+	"github.com/go-gota/gota/series"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -57,7 +60,7 @@ type GenomicsDBQueryConfig struct {
 	Filter          string
 }
 
-func Query(queryConfig GenomicsDBQueryConfig) (bool, string) {
+func configure(queryConfig GenomicsDBQueryConfig) protobuf.ExportConfiguration {
 	// Construct export config protobuf
 	var exportConfig protobuf.ExportConfiguration
 
@@ -87,9 +90,68 @@ func Query(queryConfig GenomicsDBQueryConfig) (bool, string) {
 		exportConfig.QueryFilter = ptr(queryConfig.Filter)
 	}
 
-	data, err := proto.Marshal(&exportConfig)
+	return exportConfig
+}
+
+var df dataframe.DataFrame
+
+func constructDataFrame(genomicsdbQuery unsafe.Pointer) (bool, dataframe.DataFrame) {
+	nGenomicFields := C.get_genomic_field_count(genomicsdbQuery)
+	var genomicSeries = make([]series.Series, 4+nGenomicFields) // 4 for sample/chrom/pos/end
+
+	nVariantCalls := C.uint64_t(C.get_count(genomicsdbQuery))
+	fmt.Println("number of VariantCalls =", nVariantCalls)
+	sampleNames := make([]string, nVariantCalls)
+	chromosomes := make([]string, nVariantCalls)
+	var i, j C.uint64_t
+	var info C.info_t
+	for i = 0; i < nVariantCalls; i++ {
+		if C.get_sample_name(genomicsdbQuery, i, &info) == 1 {
+			sampleNames[i] = C.GoString((*C.char)(unsafe.Pointer(info.ptr)))
+		}
+		if C.get_chromosome(genomicsdbQuery, i, &info) == 1 {
+			chromosomes[i] = C.GoString((*C.char)(unsafe.Pointer(info.ptr)))
+		}
+	}
+	positions := unsafe.Slice((*int)(unsafe.Pointer(C.get_positions(genomicsdbQuery))), nVariantCalls)
+	end_positions := unsafe.Slice((*int)(unsafe.Pointer(C.get_end_positions(genomicsdbQuery))), nVariantCalls)
+
+	genomicSeries[0] = series.New(sampleNames, series.String, "Sample")
+	genomicSeries[1] = series.New(chromosomes, series.String, "CHROM")
+	genomicSeries[2] = series.New(positions, series.Int, "POS")
+	genomicSeries[3] = series.New(end_positions, series.Int, "END")
+
+	for i = 0; i < nGenomicFields; i++ {
+		if C.get_genomic_field_info(genomicsdbQuery, i, &info) == 1 {
+			name := C.GoString(info.name)
+			if info.kind == 0 {
+				genomic_field := make([]string, nVariantCalls)
+				for j = 0; j < nVariantCalls; j++ {
+					genomic_field[j] = C.GoString((*C.char)(unsafe.Pointer(info.ptr)))
+				}
+				genomicSeries[i+4] = series.New(genomic_field, series.String, name)
+			} else if info.kind == 1 {
+				genomic_field := unsafe.Slice((*int)(unsafe.Pointer(info.ptr)), nVariantCalls)
+				genomicSeries[i+4] = series.New(genomic_field, series.Int, name)
+			} else if info.kind == 2 {
+				genomic_field := unsafe.Slice((*float32)(unsafe.Pointer(info.ptr)), nVariantCalls)
+				genomicSeries[i+4] = series.New(genomic_field, series.Float, name)
+			} else {
+				return false, df
+			}
+		} else {
+			return false, df
+		}
+	}
+
+	return true, dataframe.New(genomicSeries...)
+}
+
+func GenomicsDBQuery(queryConfig GenomicsDBQueryConfig) (bool, string, dataframe.DataFrame) {
+	config := configure(queryConfig)
+	data, err := proto.Marshal(&config)
 	if err != nil {
-		return false, fmt.Sprintln("marshaling error: ", err)
+		return false, fmt.Sprintln("marshaling error: ", err), df
 	}
 
 	len := C.size_t(C.int(len(data)))
@@ -99,11 +161,25 @@ func Query(queryConfig GenomicsDBQueryConfig) (bool, string) {
 	copy(cBuf[:], data)
 
 	var status C.status_t
-	genomicsdb_handle := C.connect(p, len, &status)
-	if status.succeeded == 0 || genomicsdb_handle == nil {
-		return false, fmt.Sprintln("Could not connect to GenomicsDB : ", C.GoString(&status.error_message[0]))
+	genomicsdbHandle := C.connect(p, len, &status)
+	if status.succeeded == 0 || genomicsdbHandle == nil {
+		return false, fmt.Sprintln("Could not connect to GenomicsDB : ", C.GoString(&status.error_message[0])), df
 	}
-	C.query_variant_calls(genomicsdb_handle)
-	C.disconnect(genomicsdb_handle)
-	return true, ""
+
+	genomicsdbQuery := C.query(genomicsdbHandle, &status)
+	if status.succeeded == 0 || genomicsdbHandle == nil {
+		C.disconnect(genomicsdbHandle)
+		return false, fmt.Sprintln("Could not setup GenomicsDB query: ", C.GoString(&status.error_message[0])), df
+	}
+
+	succeed, genomicsdb_df := constructDataFrame(genomicsdbQuery)
+
+	C.delete_query(genomicsdbQuery)
+	C.disconnect(genomicsdbHandle)
+
+	if !succeed {
+		return false, "Exception occurred while constructing data frame", df
+	} else {
+		return true, "", genomicsdb_df
+	}
 }
