@@ -27,6 +27,7 @@
 package bindings
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -48,7 +49,7 @@ func createTestQueryConfig(workspace string, array string) GenomicsDBQueryConfig
 }
 
 func TestQueryNonExistentWorkspace(t *testing.T) {
-	succeeded, errMsg := Query(createTestQueryConfig("non-existent-ws", "non-existent-array"))
+	succeeded, errMsg, _ := GenomicsDBQuery(createTestQueryConfig("non-existent-ws", "non-existent-array"))
 	if succeeded {
 		t.Fatal("TestQueryNonExistentWorkspace should not succeed")
 	} else if len(errMsg) == 0 {
@@ -67,10 +68,13 @@ func TestQuery(t *testing.T) {
 		{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(2))}}}}
 	config.Attributes = []string{"GT", "DP"}
 	config.Filter = "REF == \"G\" && GT &= \"1/1\" && ALT |= \"T\""
-	succeeded, _ := Query(config)
+	succeeded, _, df := GenomicsDBQuery(config)
+
 	if !succeeded {
 		t.Fatal("TestQuery failed")
 	}
+
+	fmt.Println(df)
 }
 
 func TestGenomicsDBDemoData(t *testing.T) {
@@ -83,12 +87,12 @@ func TestGenomicsDBDemoData(t *testing.T) {
 			{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(200000))}}}}
 		config.Attributes = []string{"REF", "ALT", "GT"}
 		config.Filter = "REF==\"A\" && ALT|=\"T\" && GT&=\"1/1\""
-		succeeded, _ := Query(config)
+		succeeded, _, df := GenomicsDBQuery(config)
 		if !succeeded {
 			t.Fatal("TestQuery failed")
 		}
+		fmt.Println(df)
 	} else {
 		t.Log("Skipping TestGenomicsDBDemoData. Set env GENOMICSDB_DEMO_WS to run this test")
 	}
-
 }
