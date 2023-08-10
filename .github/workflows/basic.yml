@@ -29,6 +29,7 @@ jobs:
         go get google.golang.org/protobuf/proto
         go get github.com/go-gota/gota/series
         go get github.com/go-gota/gota/dataframe
+        go mod tidy
         go mod download github.com/golang/protobuf
         go mod tidy
         go install github.com/golang/protobuf/protoc-gen-go
