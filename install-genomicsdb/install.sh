@@ -94,7 +94,11 @@ if [[ $(uname) == "darwin" ]]; then
 else
   echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
 fi
-echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib/pkgconfig" >> genomicsdb.env
+if [[ -f $CMAKE_INSTALL_PREFIX/lib/pkgconfig/genomicsdb.pc ]]; then
+  echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib/pkgconfig" >> genomicsdb.env
+else if [[ -f $CMAKE_INSTALL_PREFIX/lib64/pkgconfig/genomicsdb.pc ]]; then
+  echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib64/pkgconfig" >> genomicsdb.env
+fi
 
 echo "Installing GenomicsDB DONE"
 cleanup 0
