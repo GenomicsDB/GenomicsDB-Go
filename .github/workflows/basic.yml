@@ -34,6 +34,7 @@ jobs:
 
     - name: Install native GenomicsDB
       working-directory: ${{ github.workspace }}/install-genomicsdb
+      run: |
         go build -v ./...
         ./install-genomicsdb
 
