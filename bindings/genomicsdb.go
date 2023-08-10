@@ -106,11 +106,17 @@ func constructDataFrame(genomicsdbQuery unsafe.Pointer) (bool, dataframe.DataFra
 	var i, j C.uint64_t
 	var info C.info_t
 	for i = 0; i < nVariantCalls; i++ {
-		if C.get_sample_name(genomicsdbQuery, i, &info) == 1 {
-			sampleNames[i] = C.GoString((*C.char)(unsafe.Pointer(info.ptr)))
+		sampleName := C.get_sample_name_at(genomicsdbQuery, i)
+		if sampleName != nil {
+			sampleNames[i] = C.GoString((*C.char)(unsafe.Pointer(sampleName)))
+		} else {
+			return false, df
 		}
-		if C.get_chromosome(genomicsdbQuery, i, &info) == 1 {
-			chromosomes[i] = C.GoString((*C.char)(unsafe.Pointer(info.ptr)))
+		chromosome := C.get_chromosome_at(genomicsdbQuery, i)
+		if chromosome != nil {
+			chromosomes[i] = C.GoString((*C.char)(unsafe.Pointer(chromosome)))
+		} else {
+			return false, df
 		}
 	}
 	positions := unsafe.Slice((*int)(unsafe.Pointer(C.get_positions(genomicsdbQuery))), nVariantCalls)
@@ -127,7 +133,12 @@ func constructDataFrame(genomicsdbQuery unsafe.Pointer) (bool, dataframe.DataFra
 			if info.kind == 0 {
 				genomic_field := make([]string, nVariantCalls)
 				for j = 0; j < nVariantCalls; j++ {
-					genomic_field[j] = C.GoString((*C.char)(unsafe.Pointer(info.ptr)))
+					string_field := C.get_genomic_string_field_at(genomicsdbQuery, info.name, j)
+					if string_field != nil {
+						genomic_field[j] = C.GoString((*C.char)(unsafe.Pointer(string_field)))
+					} else {
+						return false, df
+					}
 				}
 				genomicSeries[i+4] = series.New(genomic_field, series.String, name)
 			} else if info.kind == 1 {
