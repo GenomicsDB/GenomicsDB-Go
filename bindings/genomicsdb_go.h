@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -59,7 +60,7 @@ extern "C" {
 
   uint64_t get_genomic_field_count(void *query_processor);
   int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info_t);
-  char *get_genomic_string_field_at(char **ptr, uint64_t index);
+  char *get_genomic_string_field_at(void *ptr, uint64_t index);
   
   void delete_query(void *query_processor);
 

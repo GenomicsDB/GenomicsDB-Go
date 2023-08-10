@@ -30,6 +30,7 @@
 
 #include <cmath>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 class CountCellsProcessor : public GenomicsDBVariantCallProcessor {
@@ -263,8 +264,8 @@ int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info) 
   return found;
 }
 
-char *get_genomic_string_field_at(char **ptr, uint64_t index) {
-  return ptr[index];
+char *get_genomic_string_field_at(void *ptr, uint64_t index) {
+  return ((char **)ptr)[index];
 }
 
 void delete_query(void *query_processor) {
