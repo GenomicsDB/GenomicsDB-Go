@@ -24,13 +24,16 @@ jobs:
         go-version: '1.20'
         
     - name: Install dependencies
-      working-directory: ${{ github.workspace }}/install-genomicsdb
+      working-directory: ${{ github.workspace }}/bindings
       run: |
         go get google.golang.org/protobuf/proto
         go get github.com/go-gota/gota/series
         go get github.com/go-gota/gota/dataframe
+        go mod download github.com/golang/protobuf
         go install github.com/golang/protobuf/protoc-gen-go
-        #
+
+    - name: Install native GenomicsDB
+      working-directory: ${{ github.workspace }}/install-genomicsdb
         go build -v ./...
         ./install-genomicsdb
 
