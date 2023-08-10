@@ -30,6 +30,7 @@
 
 #include <cmath>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 class CountCellsProcessor : public GenomicsDBVariantCallProcessor {
@@ -207,24 +208,20 @@ uint64_t get_count(void *query_processor) {
   return ((VariantCallProcessor *)query_processor)->count();
 }
 
-int get_sample_name(void *query_processor, uint64_t index, info_t *info) {
-  int found = 0;
+char *get_sample_name_at(void *query_processor, uint64_t index) {
   if (index < VARIANT_CALL_PROCESSOR->m_sample_names.size()) {
     auto& sample_names = VARIANT_CALL_PROCESSOR->m_sample_names;
-    info->ptr = const_cast<char *>(sample_names[index].c_str());
-    found = 1;
+    return const_cast<char *>(sample_names[index].c_str());
   }
-  return found;
+  return 0;
 }
 
-int get_chromosome(void *query_processor, uint64_t index, info_t *info) {
-  int found = 0;
+char *get_chromosome_at(void *query_processor, uint64_t index) {
   if (index < VARIANT_CALL_PROCESSOR->m_sample_names.size()) {
     auto& chrom = VARIANT_CALL_PROCESSOR->m_chrom;
-    info->ptr = const_cast<char *>(chrom[index].c_str());
-    found = 1;
+    return const_cast<char *>(chrom[index].c_str());
   }
-  return found;
+  return 0;
 }
 
 int64_t *get_positions(void *query_processor) {
@@ -246,9 +243,8 @@ int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info) 
   auto& field_name = VARIANT_CALL_PROCESSOR->m_field_names[index];
   info->name = &field_name[0];
   if (VARIANT_CALL_PROCESSOR->m_string_fields.find(field_name) != VARIANT_CALL_PROCESSOR->m_string_fields.end()) {
-    auto& string_field = VARIANT_CALL_PROCESSOR->m_string_fields[field_name];
     info->kind = 0;
-    info->ptr = &string_field[0];
+    info->ptr = 0; // Use get_genomic_string_field_at() to get the string based on the index
   } else if (VARIANT_CALL_PROCESSOR->m_int_fields.find(field_name) != VARIANT_CALL_PROCESSOR->m_int_fields.end()) {
     auto& int_field = VARIANT_CALL_PROCESSOR->m_int_fields[field_name];
     info->kind = 1;
@@ -263,8 +259,12 @@ int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info) 
   return found;
 }
 
-char *get_genomic_string_field_at(char **ptr, uint64_t index) {
-  return ptr[index];
+char *get_genomic_string_field_at(void *query_processor, char *field_name, uint64_t index) {
+  if (index <  VARIANT_CALL_PROCESSOR->m_string_fields[field_name].size()) {
+    auto& string_field = VARIANT_CALL_PROCESSOR->m_string_fields[field_name];
+    return const_cast<char *>(string_field[index].c_str());
+  }
+  return 0;
 }
 
 void delete_query(void *query_processor) {
