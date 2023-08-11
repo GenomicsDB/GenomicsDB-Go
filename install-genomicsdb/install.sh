@@ -66,7 +66,9 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GE
 
 pushd $GENOMICSDB_DIR
 
-scripts/prereqs/install_prereqs.sh
+echo "Installing prerequisites..."
+$SUDO scripts/prereqs/install_prereqs.sh
+echo "Install prerequisites DONE"
 
 #TEMP FIX
 sed -i.bak -e '160d' CMakeLists.txt
