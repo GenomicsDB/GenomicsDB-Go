@@ -60,7 +60,8 @@ jobs:
         ls -l /usr/local/lib/libtile*
         ls -l /usr/local/lib/pkgconfig/gen*
         cat /usr/local/lib/pkgconfig/gen*
-        source ../genomicsdb.env
+        source ../install-genomicsdb/genomicsdb.env
+        cat ../install-genomicsdb/genomicsdb.env
         echo "Starting go build/test"
         go build -v
         go test
