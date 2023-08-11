@@ -29,15 +29,8 @@ jobs:
         go get google.golang.org/protobuf/proto
         go get github.com/go-gota/gota/series
         go get github.com/go-gota/gota/dataframe
-        echo "we are here"
-        go mod tidy -e
-        echo "we are here 1"
         go mod download github.com/golang/protobuf
-        echo "we are here 2"
-        go mod tidy -e
-        echo "we are here 3"
         go install github.com/golang/protobuf/protoc-gen-go@latest
-        echo "we are here DONE"
 
     - name: Install native GenomicsDB
       working-directory: ${{ github.workspace }}/install-genomicsdb
