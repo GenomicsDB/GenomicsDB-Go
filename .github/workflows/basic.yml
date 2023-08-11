@@ -56,16 +56,9 @@ jobs:
     - name: Build and test
       working-directory:  ${{ github.workspace }}/bindings
       run: |
-        echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-        ls -l /usr/local/lib/libtile*
-        ls -l /usr/local/lib/pkgconfig/gen*
-        cat /usr/local/lib/pkgconfig/gen*
         source ../install-genomicsdb/genomicsdb.env
-        cat ../install-genomicsdb/genomicsdb.env
-        echo "Starting go build/test"
         go build -v
         go test
-        echo "Starting go build/test DONE"
 
 
 
