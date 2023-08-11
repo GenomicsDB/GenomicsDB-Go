@@ -91,9 +91,9 @@ fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
 if [[ $(uname) == "darwin" ]]; then
-  echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+  echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$DYLD_LIBRARY_PATH" > genomicsdb.env
 else
-  echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+  echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH" > genomicsdb.env
 fi
 
 if [[ -f $CMAKE_INSTALL_PREFIX/lib/pkgconfig/genomicsdb.pc ]]; then

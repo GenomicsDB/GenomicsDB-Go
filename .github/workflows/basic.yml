@@ -59,7 +59,12 @@ jobs:
         echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
         ls -l /usr/local/lib/libtile*
         ls -l /usr/local/lib/pkgconfig/gen*
-        go build -v ./...
+        cat /usr/local/lib/pkgconfig/gen*
+        source ../genomicsdb.env
+        echo "Starting go build/test"
+        go build -v
+        go test
+        echo "Starting go build/test DONE"
 
 
 
