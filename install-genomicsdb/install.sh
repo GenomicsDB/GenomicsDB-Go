@@ -81,6 +81,8 @@ $SUDO make install
 popd
 popd
 
+echo "***we are here"
+
 PARENT_DIR=$(dirname $(pwd))
 echo "PARENT_DIR=$PARENT_DIR"
 TOPLEVEL_GIT_DIR=$(git rev-parse --show-toplevel)
@@ -93,16 +95,23 @@ if [[ $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
 fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
+echo "***we are here 1"
+
 if [[ $(uname) == "darwin" ]]; then
   echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
 else
   echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
 fi
+
+echo "***we are here 2"
+
 if [[ -f $CMAKE_INSTALL_PREFIX/lib/pkgconfig/genomicsdb.pc ]]; then
   echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib/pkgconfig" >> genomicsdb.env
-else if [[ -f $CMAKE_INSTALL_PREFIX/lib64/pkgconfig/genomicsdb.pc ]]; then
+elif [[ -f $CMAKE_INSTALL_PREFIX/lib64/pkgconfig/genomicsdb.pc ]]; then
   echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib64/pkgconfig" >> genomicsdb.env
 fi
+
+echo "***we are here 3"
 
 echo "Installing GenomicsDB DONE"
 cleanup 0
