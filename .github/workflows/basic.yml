@@ -42,7 +42,6 @@ jobs:
       working-directory: ${{ github.workspace }}/install-genomicsdb
       run: |
         go build -v ./...
-        if [[ `uname` == "Darwin" ]]; then echo "Finding SDK..." && ls -l /Library/Developer/CommandLineTools/ fi
         ./install-genomicsdb
 
     - name: Build and test
