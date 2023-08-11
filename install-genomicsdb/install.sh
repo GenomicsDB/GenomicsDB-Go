@@ -37,9 +37,6 @@ GENOMICSDB_NO_CLEAN=${GENOMICSDB_NO_CLEAN:false}
 # Get absolute path for CMAKE_INSTALL_PREFIX
 CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" $CMAKE_INSTALL_PREFIX)
 
-# Get absolute path for CMAKE_INSTALL_PREFIX
-CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" ./install)
-
 cleanup() {
   if [[ $1 -eq 1 ]]; then
     if [[ $GENOMICSDB_NO_CLEAN == true ]]; then
