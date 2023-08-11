@@ -50,7 +50,7 @@ jobs:
     - name: Install native GenomicsDB
       working-directory: ${{ github.workspace }}/install-genomicsdb
       run: |
-        go build -v ./...
+        go build -v
         ./install-genomicsdb
 
     - name: Build and test
@@ -58,7 +58,7 @@ jobs:
       run: |
         source ../install-genomicsdb/genomicsdb.env
         go build -v
-        go test
+        go test -v
 
 
 
