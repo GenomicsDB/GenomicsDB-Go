@@ -37,9 +37,6 @@ GENOMICSDB_NO_CLEAN=${GENOMICSDB_NO_CLEAN:false}
 # Get absolute path for CMAKE_INSTALL_PREFIX
 CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" $CMAKE_INSTALL_PREFIX)
 
-# Get absolute path for CMAKE_INSTALL_PREFIX
-CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" ./install)
-
 cleanup() {
   if [[ $1 -eq 1 ]]; then
     if [[ $GENOMICSDB_NO_CLEAN == true ]]; then
@@ -66,6 +63,10 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GE
 
 pushd $GENOMICSDB_DIR
 
+echo "Installing prerequisites..."
+$SUDO scripts/prereqs/install_prereqs.sh
+echo "Install prerequisites DONE"
+
 #TEMP FIX
 sed -i.bak -e '160d' CMakeLists.txt
 
@@ -90,13 +91,14 @@ fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
 if [[ $(uname) == "darwin" ]]; then
-  echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+  echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$DYLD_LIBRARY_PATH" > genomicsdb.env
 else
-  echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+  echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH" > genomicsdb.env
 fi
+
 if [[ -f $CMAKE_INSTALL_PREFIX/lib/pkgconfig/genomicsdb.pc ]]; then
   echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib/pkgconfig" >> genomicsdb.env
-else if [[ -f $CMAKE_INSTALL_PREFIX/lib64/pkgconfig/genomicsdb.pc ]]; then
+elif [[ -f $CMAKE_INSTALL_PREFIX/lib64/pkgconfig/genomicsdb.pc ]]; then
   echo "export PKG_CONFIG_PATH=$CMAKE_INSTALL_PREFIX/lib64/pkgconfig" >> genomicsdb.env
 fi
 

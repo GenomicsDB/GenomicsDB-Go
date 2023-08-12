@@ -1,0 +1,64 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Cache built prerequisites
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/awssdk-install
+          ~/gcssdk-install
+          ~/protobuf-install
+        key: ${{matrix.os}}-cache-sdk-prereqs-v1
+        
+    - name: Install dependencies
+      working-directory: ${{ github.workspace }}/bindings
+      run: |
+        go get google.golang.org/protobuf/proto
+        go get github.com/go-gota/gota/series
+        go get github.com/go-gota/gota/dataframe
+        go mod download github.com/golang/protobuf
+        go install github.com/golang/protobuf/protoc-gen-go@latest
+
+    - name: Install native GenomicsDB
+      working-directory: ${{ github.workspace }}/install-genomicsdb
+      run: |
+        go build -v
+        ./install-genomicsdb
+
+    - name: Build and test
+      working-directory:  ${{ github.workspace }}/bindings
+      run: |
+        source ../install-genomicsdb/genomicsdb.env
+        go build -v
+        go test -v
+
+
+
