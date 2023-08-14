@@ -69,7 +69,7 @@ if [[ $(uname) == "Darwin" ]]; then
 else
   PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh $SUDO scripts/prereqs/install_prereqs.sh
 fi
-if [[ -f PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh ]]; then
+if [[ -f $GENOMICSDB_DIR/prereqs.sh ]]; then
   echo "Source PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh"
   source PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh
 fi
