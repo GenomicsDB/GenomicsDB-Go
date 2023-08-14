@@ -70,8 +70,8 @@ else
   PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh $SUDO scripts/prereqs/install_prereqs.sh
 fi
 if [[ -f $GENOMICSDB_DIR/prereqs.sh ]]; then
-  echo "Source PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh"
-  source PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh
+  echo "Sourcing $GENOMICSDB_DIR/prereqs.sh"
+  source $GENOMICSDB_DIR/prereqs.sh
 fi
 echo "Install prerequisites DONE"
 
