@@ -64,7 +64,11 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GE
 pushd $GENOMICSDB_DIR
 
 echo "Installing prerequisites..."
-$SUDO scripts/prereqs/install_prereqs.sh
+if [[ $(uname) == "darwin" ]]; then
+  scripts/prereqs/install_prereqs.sh
+else
+  $SUDO scripts/prereqs/install_prereqs.sh
+fi
 echo "Install prerequisites DONE"
 
 #TEMP FIX
