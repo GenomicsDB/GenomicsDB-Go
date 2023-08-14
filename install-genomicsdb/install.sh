@@ -63,8 +63,8 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GE
 
 pushd $GENOMICSDB_DIR
 
-echo "Installing prerequisites..."
-if [[ $(uname) == "darwin" ]]; then
+echo "Installing prerequisites on System=$(uname)..."
+if [[ $(uname) == "Darwin" ]]; then
   scripts/prereqs/install_prereqs.sh
 else
   $SUDO scripts/prereqs/install_prereqs.sh
@@ -94,7 +94,7 @@ if [[ $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
 fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
-if [[ $(uname) == "darwin" ]]; then
+if [[ $(uname) == "Darwin" ]]; then
   echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$DYLD_LIBRARY_PATH" > genomicsdb.env
 else
   echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH" > genomicsdb.env
