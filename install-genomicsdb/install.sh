@@ -65,9 +65,13 @@ pushd $GENOMICSDB_DIR
 
 echo "Installing prerequisites on System=$(uname)..."
 if [[ $(uname) == "Darwin" ]]; then
-  scripts/prereqs/install_prereqs.sh
+  PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh scripts/prereqs/install_prereqs.sh
 else
-  $SUDO scripts/prereqs/install_prereqs.sh
+  PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh $SUDO scripts/prereqs/install_prereqs.sh
+fi
+if [[ -f PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh ]]; then
+  echo "Source PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh"
+  source PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh
 fi
 echo "Install prerequisites DONE"
 
