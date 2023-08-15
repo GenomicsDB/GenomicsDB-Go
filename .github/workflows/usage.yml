@@ -1,0 +1,53 @@
+name: Usage
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  example-usage:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-12]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+      
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+        check-latest: true
+        cache: false
+
+    - name: Cache built prerequisites
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/awssdk-install
+          ~/gcssdk-install
+          ~/protobuf-install
+        key: ${{matrix.os}}-cache-sdk-prereqs-v1
+
+    - name: Prerequisites
+      working-directory: ${{ github.workspace }}
+      run: |
+        rm -fr bindings install-genomicsdb
+        go install github.com/golang/protobuf/protoc-gen-go@latest
+        go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest
+        $(go env GOPATH)/bin/install-genomicsdb
+
+    - name: Example Usage
+      run: |
+        source ${{ github.workspace }}/genomicsdb.env
+        mkdir example
+        cd example
+        go mod init example/example-genomicsdb-go
+        go get -u github.com/GenomicsDB/GenomicsDB-Go/bindings
+        cp ../.github/scripts/main.go .
+        go build
+        go run .
