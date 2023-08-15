@@ -63,8 +63,16 @@ git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GE
 
 pushd $GENOMICSDB_DIR
 
-echo "Installing prerequisites..."
-$SUDO scripts/prereqs/install_prereqs.sh
+echo "Installing prerequisites on System=$(uname)..."
+if [[ $(uname) == "Darwin" ]]; then
+  PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh scripts/prereqs/install_prereqs.sh
+else
+  PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh $SUDO scripts/prereqs/install_prereqs.sh
+fi
+if [[ -f $GENOMICSDB_DIR/prereqs.sh ]]; then
+  echo "Sourcing $GENOMICSDB_DIR/prereqs.sh"
+  source $GENOMICSDB_DIR/prereqs.sh
+fi
 echo "Install prerequisites DONE"
 
 #TEMP FIX
@@ -90,7 +98,7 @@ if [[ $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
 fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
-if [[ $(uname) == "darwin" ]]; then
+if [[ $(uname) == "Darwin" ]]; then
   echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$DYLD_LIBRARY_PATH" > genomicsdb.env
 else
   echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH" > genomicsdb.env
