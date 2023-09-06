@@ -29,6 +29,7 @@ package bindings
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -62,6 +63,32 @@ func TestQueryNonExistentWorkspace(t *testing.T) {
 
 func TestQuery(t *testing.T) {
 	config := createTestQueryConfig("test-ws", "allcontigs$1$3101976562")
+	config.ContigIntervals = []*protobuf.ContigInterval{
+		{Contig: ptr("1"), Begin: ptr(int64(1)), End: ptr(int64(20000))}}
+	config.RowRanges = []*protobuf.RowRangeList{
+		{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(2))}}}}
+	config.Attributes = []string{"GT", "DP"}
+	config.Filter = "REF == \"G\" && GT &= \"1/1\" && ALT |= \"T\""
+	succeeded, _, df := GenomicsDBQuery(config)
+
+	if !succeeded {
+		t.Fatal("TestQuery failed")
+	}
+
+	fmt.Println(df)
+}
+
+func createTestQueryConfigWithVidMappingAndCallsetMappingFiles(workspace string, array string) GenomicsDBQueryConfig {
+	return GenomicsDBQueryConfig{
+		Workspace:          workspace,
+		Array:              array,
+		VidMappingFile:     filepath.Join(workspace, "vidmap.json"),
+		CallsetMappingFile: filepath.Join(workspace, "callset.json"),
+	}
+}
+
+func TestQueryWithVidMappingAndCallsetMappingFiles(t *testing.T) {
+	config := createTestQueryConfigWithVidMappingAndCallsetMappingFiles("test-ws", "allcontigs$1$3101976562")
 	config.ContigIntervals = []*protobuf.ContigInterval{
 		{Contig: ptr("1"), Begin: ptr(int64(1)), End: ptr(int64(20000))}}
 	config.RowRanges = []*protobuf.RowRangeList{

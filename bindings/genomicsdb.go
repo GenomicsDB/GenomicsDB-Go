@@ -52,12 +52,14 @@ func ptr[T any](v T) *T {
 }
 
 type GenomicsDBQueryConfig struct {
-	Workspace       string
-	Array           string
-	ContigIntervals []*protobuf.ContigInterval
-	RowRanges       []*protobuf.RowRangeList
-	Attributes      []string
-	Filter          string
+	Workspace          string
+	Array              string
+	VidMappingFile     string
+	CallsetMappingFile string
+	ContigIntervals    []*protobuf.ContigInterval
+	RowRanges          []*protobuf.RowRangeList
+	Attributes         []string
+	Filter             string
 }
 
 func configure(queryConfig GenomicsDBQueryConfig) protobuf.ExportConfiguration {
@@ -66,10 +68,21 @@ func configure(queryConfig GenomicsDBQueryConfig) protobuf.ExportConfiguration {
 
 	exportConfig.Workspace = ptr(queryConfig.Workspace)
 	exportConfig.Array = &protobuf.ExportConfiguration_ArrayName{ArrayName: queryConfig.Array}
-	exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{
-		VidMappingFile: filepath.Join(queryConfig.Workspace, "vidmap.json")}
-	exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
-		CallsetMappingFile: filepath.Join(queryConfig.Workspace, "callset.json"),
+	if len(queryConfig.VidMappingFile) > 0 {
+		exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{
+			VidMappingFile: queryConfig.VidMappingFile}
+	} else {
+		exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{
+			VidMappingFile: filepath.Join(queryConfig.Workspace, "vidmap.json"),
+		}
+	}
+	if len(queryConfig.CallsetMappingFile) > 0 {
+		exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
+			CallsetMappingFile: queryConfig.CallsetMappingFile}
+	} else {
+		exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
+			CallsetMappingFile: filepath.Join(queryConfig.Workspace, "callset.json"),
+		}
 	}
 	exportConfig.BypassIntersectingIntervalsPhase = ptr(true)
 	exportConfig.EnableSharedPosixfsOptimizations = ptr(true)
