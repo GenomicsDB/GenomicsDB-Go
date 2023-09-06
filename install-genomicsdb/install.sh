@@ -80,7 +80,11 @@ sed -i.bak -e '160d' CMakeLists.txt
 
 mkdir build
 pushd build
-cmake -DBUILD_FOR_GO=1 -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX .. || cleanup 1
+if [[ -n $OPENSSL_ROOT_DIR ]]; then
+  CMAKE_PREFIX_PATH="-DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR"
+fi
+
+cmake -DBUILD_FOR_GO=1 $CMAKE_PREFIX_PATH -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX -DAWSSDK_ROOT_DIR=$GENOMICSDB_DIR/awssdk -DGCSSDK_ROOT_DIR=$GENOMICSDB_DIR/gcssdk -DPROTOBUF_ROOT_DIR=$GENOMICSDB_DIR/protobuf .. || cleanup 1
 make -j4 || cleanup 1
 $SUDO make install
 popd
