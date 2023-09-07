@@ -33,18 +33,25 @@ else
   SUDO=""
 fi
 GENOMICSDB_NO_CLEAN=${GENOMICSDB_NO_CLEAN:false}
+GENOMICSDB_DEVELOPER=${GENOMICSDB_DEVELOPER:false}
+if [[ $GENOMICSDB_DEVELOPER == 1 || $GENOMICSDB_DEVELOPER == true ]]; then
+  GENOMICSDB_DEVELOPER=true
+else
+  GENOMICSDB_DEVELOPER=false
+fi
 
 # Get absolute path for CMAKE_INSTALL_PREFIX
 CMAKE_INSTALL_PREFIX=$(python3 -c "import os,sys; print(os.path.abspath(sys.argv[1]))" $CMAKE_INSTALL_PREFIX)
 
 cleanup() {
   if [[ $1 -eq 1 ]]; then
-    if [[ $GENOMICSDB_NO_CLEAN == true ]]; then
-      echo "*** Error encountered building workspace at $GENOMICSDB_DIR "
-    else
+    if [[ $GENOMICSDB_NO_CLEAN == false ]]; then
       echo "*** Error encountered. Removing $GENOMICSDB_DIR..."
+    else
+      echo "*** Error encountered building workspace at $GENOMICSDB_DIR "
     fi
   fi
+
   if [[ $GENOMICSDB_NO_CLEAN == false ]]; then
     rm -fr $GENOMICSDB_DIR
     echo "Removing $GENOMICSDB_DIR DONE"
@@ -80,21 +87,22 @@ sed -i.bak -e '160d' CMakeLists.txt
 
 mkdir build
 pushd build
+
 if [[ -n $OPENSSL_ROOT_DIR ]]; then
   CMAKE_PREFIX_PATH="-DCMAKE_PREFIX_PATH=$OPENSSL_ROOT_DIR"
 fi
-
-cmake -DBUILD_FOR_GO=1 $CMAKE_PREFIX_PATH -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX -DAWSSDK_ROOT_DIR=$GENOMICSDB_DIR/awssdk -DGCSSDK_ROOT_DIR=$GENOMICSDB_DIR/gcssdk -DPROTOBUF_ROOT_DIR=$GENOMICSDB_DIR/protobuf .. || cleanup 1
+if [[ $GENOMICSDB_DEVELOPER == true ]]; then
+  BUILD_FOR_GO="-DBUILD_FOR_GO=1"
+fi
+cmake $BUILD_FOR_GO $CMAKE_PREFIX_PATH -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX -DAWSSDK_ROOT_DIR=$GENOMICSDB_DIR/awssdk -DGCSSDK_ROOT_DIR=$GENOMICSDB_DIR/gcssdk -DPROTOBUF_ROOT_DIR=$GENOMICSDB_DIR/protobuf .. || cleanup 1
 make -j4 || cleanup 1
 $SUDO make install
 popd
 popd
 
 PARENT_DIR=$(dirname $(pwd))
-echo "PARENT_DIR=$PARENT_DIR"
 TOPLEVEL_GIT_DIR=$(git rev-parse --show-toplevel)
-echo "TOPLEVEL_GIT_DIR=$TOPLEVEL_GIT_DIR"
-if [[ $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
+if [[ $GENOMICSDB_DEVELOPER == true && $TOPLEVEL_GIT_DIR == $PARENT_DIR ]]; then
   # This script is from the git repository and we probably want to install protobuf go sources
   echo "Copying GenomicsDB protobuf go generated sources..."
   cp -vf $CMAKE_INSTALL_PREFIX/genomicsdb/protobuf/go/* $PARENT_DIR/bindings/protobuf
