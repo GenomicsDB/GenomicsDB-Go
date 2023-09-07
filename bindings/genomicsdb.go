@@ -34,7 +34,7 @@ import "C"
 
 import (
 	"fmt"
-	"path/filepath"
+	"net/url"
 	"unsafe"
 
 	"github.com/GenomicsDB/GenomicsDB-Go/bindings/protobuf"
@@ -72,16 +72,24 @@ func configure(queryConfig GenomicsDBQueryConfig) protobuf.ExportConfiguration {
 		exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{
 			VidMappingFile: queryConfig.VidMappingFile}
 	} else {
-		exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{
-			VidMappingFile: filepath.Join(queryConfig.Workspace, "vidmap.json"),
+		vidMappingFile, err := url.JoinPath(queryConfig.Workspace, "vidmap.json")
+		if err != nil {
+			fmt.Println("vidMappingFile url.JoinPath error: ", err)
+		} else {
+			exportConfig.VidMappingInfo = &protobuf.ExportConfiguration_VidMappingFile{VidMappingFile: vidMappingFile}
 		}
 	}
 	if len(queryConfig.CallsetMappingFile) > 0 {
 		exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
 			CallsetMappingFile: queryConfig.CallsetMappingFile}
 	} else {
-		exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
-			CallsetMappingFile: filepath.Join(queryConfig.Workspace, "callset.json"),
+		callsetMappingFile, err := url.JoinPath(queryConfig.Workspace, "callset.json")
+		if err != nil {
+			fmt.Println("callsetMappingFile url.JoinPath error: ", err)
+		} else {
+			exportConfig.CallsetMappingInfo = &protobuf.ExportConfiguration_CallsetMappingFile{
+				CallsetMappingFile: callsetMappingFile,
+			}
 		}
 	}
 	exportConfig.BypassIntersectingIntervalsPhase = ptr(true)
