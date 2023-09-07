@@ -61,6 +61,30 @@ func TestQueryNonExistentWorkspace(t *testing.T) {
 	}
 }
 
+func TestQueryWorkspaceWithInvalidURL(t *testing.T) {
+	succeeded, errMsg, _ := GenomicsDBQuery(createTestQueryConfig("azb://my Container/myPath?endpoint=foo.blob.core.windows.net", "non-existent-array"))
+	if succeeded {
+		t.Fatal("TestQueryNonExistentWorkspace should not succeed")
+	} else if len(errMsg) == 0 {
+		t.Fatal("TestQueryNonExistentWorkspace should return error message")
+	}
+	if len(errMsg) == 0 {
+		t.Fatal("No error message from failed Query")
+	}
+}
+
+func TestQueryWorkspaceWithNonExistentWorkspaceURL(t *testing.T) {
+	succeeded, errMsg, _ := GenomicsDBQuery(createTestQueryConfig("azb://myContainer/non-existent-workspace?endpoint=foo.blob.core.windows.net", "non-existent-array"))
+	if succeeded {
+		t.Fatal("TestQueryNonExistentWorkspace should not succeed")
+	} else if len(errMsg) == 0 {
+		t.Fatal("TestQueryNonExistentWorkspace should return error message")
+	}
+	if len(errMsg) == 0 {
+		t.Fatal("No error message from failed Query")
+	}
+}
+
 func TestQuery(t *testing.T) {
 	config := createTestQueryConfig("test-ws", "allcontigs$1$3101976562")
 	config.ContigIntervals = []*protobuf.ContigInterval{
