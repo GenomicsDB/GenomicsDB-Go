@@ -5,7 +5,7 @@ Experimental golang bindings to the native [GenomicsDB](https://github.com/Genom
 Installation : Only Linux and MacOS are supported
 ### Step 1 - Prerequisites
 This step is required to install native genomicsdb if it is not available.
-- system prerequisites for native genomicsdb are minimal, see [scripts](https://github.com/GenomicsDB/GenomicsDB/tree/master/scripts/prereqs/system) to install them if needed
+- system prerequisites for native genomicsdb are minimal, openssl/curl/zlib.
 - verify that $GOPATH is included in the $PATH environment variable
 - _go install github.com/golang/protobuf/protoc-gen-go@latest_
 - _go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest_
