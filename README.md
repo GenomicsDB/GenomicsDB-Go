@@ -7,7 +7,6 @@ Installation : Only Linux and MacOS are supported
 This step is required to install native genomicsdb if it is not available.
 - system prerequisites for native genomicsdb are minimal, openssl/curl/zlib.
 - verify that $GOPATH is included in the $PATH environment variable
-- _go install github.com/golang/protobuf/protoc-gen-go@latest_
 - _go install github.com/GenomicsDB/GenomicsDB-Go/install-genomicsdb@latest_
 - Invoke $GOPATH/bin/install-genomicsdb
   - By default, the genomicsdb shared library is installed in `/usr/local` and may require `sudo` access. Set environment variable `GENOMICSDB_INSTALL_DIR` to any custom location before invoking `InstallGenomicsDB` for installing to locations other than `/usr/local`.
