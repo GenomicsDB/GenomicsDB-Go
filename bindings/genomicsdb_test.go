@@ -92,11 +92,11 @@ func TestQuery(t *testing.T) {
 	config.RowRanges = []*protobuf.RowRangeList{
 		{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(2))}}}}
 	config.Attributes = []string{"GT", "DP"}
-	config.Filter = "REF == \"G\" && GT &= \"1/1\" && ALT |= \"T\""
-	succeeded, _, df := GenomicsDBQuery(config)
+	config.Filter = "REF == \"G\" && resolve(GT,REF,ALT) &= \"T/T\" && ALT |= \"T\""
+	succeeded, errMsg, df := GenomicsDBQuery(config)
 
 	if !succeeded {
-		t.Fatal("TestQuery failed")
+		t.Fatal("TestQuery failed: " + errMsg)
 	}
 
 	fmt.Println(df)
@@ -118,11 +118,11 @@ func TestQueryWithVidMappingAndCallsetMappingFiles(t *testing.T) {
 	config.RowRanges = []*protobuf.RowRangeList{
 		{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(2))}}}}
 	config.Attributes = []string{"GT", "DP"}
-	config.Filter = "REF == \"G\" && GT &= \"1/1\" && ALT |= \"T\""
-	succeeded, _, df := GenomicsDBQuery(config)
+	config.Filter = "REF == \"G\" && resolve(GT, REF, ALT) &= \"T/T\" && ALT |= \"T\""
+	succeeded, errMsg, df := GenomicsDBQuery(config)
 
 	if !succeeded {
-		t.Fatal("TestQuery failed")
+		t.Fatal("TestQuery failed:" + errMsg)
 	}
 
 	fmt.Println(df)
@@ -137,10 +137,10 @@ func TestGenomicsDBDemoData(t *testing.T) {
 		config.RowRanges = []*protobuf.RowRangeList{
 			{RangeList: []*protobuf.RowRange{{Low: ptr(int64(0)), High: ptr(int64(200000))}}}}
 		config.Attributes = []string{"REF", "ALT", "GT"}
-		config.Filter = "REF==\"A\" && ALT|=\"T\" && GT&=\"1/1\""
-		succeeded, _, df := GenomicsDBQuery(config)
+		config.Filter = "REF==\"A\" && ALT|=\"T\" && resolve(GT,REF,ALT)&=\"T/T\""
+		succeeded, errMsg, df := GenomicsDBQuery(config)
 		if !succeeded {
-			t.Fatal("TestQuery failed")
+			t.Fatal("TestQuery failed: " + errMsg)
 		}
 		fmt.Println(df)
 	} else {
