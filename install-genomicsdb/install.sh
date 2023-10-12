@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 #
 
-GENOMICSDB_BRANCH=${GENOMICSDB_BRANCH:-develop}
+GENOMICSDB_BRANCH=${GENOMICSDB_BRANCH:-master}
 CMAKE_INSTALL_PREFIX=${GENOMICSDB_INSTALL_DIR:-/usr/local}
 GENOMICSDB_DIR=$(mktemp -d).GenomicsDB
 if [[ $CMAKE_INSTALL_PREFIX == "/usr/local" ]]; then
@@ -81,9 +81,6 @@ if [[ -f $GENOMICSDB_DIR/prereqs.sh ]]; then
   source $GENOMICSDB_DIR/prereqs.sh
 fi
 echo "Install prerequisites DONE"
-
-#TEMP FIX
-sed -i.bak -e '160d' CMakeLists.txt
 
 mkdir build
 pushd build
