@@ -44,7 +44,7 @@ import (
 )
 
 func GetVersion() string {
-	return C.GoString(C.version())
+	return C.GoString(C.genomicsdb_version())
 }
 
 func ptr[T any](v T) *T {
@@ -117,31 +117,31 @@ func configure(queryConfig GenomicsDBQueryConfig) protobuf.ExportConfiguration {
 var df dataframe.DataFrame
 
 func constructDataFrame(genomicsdbQuery unsafe.Pointer) (bool, dataframe.DataFrame) {
-	nGenomicFields := C.get_genomic_field_count(genomicsdbQuery)
+	nGenomicFields := C.genomicsdb_get_genomic_field_count(genomicsdbQuery)
 	var genomicSeries = make([]series.Series, 4+nGenomicFields) // 4 for sample/chrom/pos/end
 
-	nVariantCalls := C.uint64_t(C.get_count(genomicsdbQuery))
+	nVariantCalls := C.uint64_t(C.genomicsdb_get_count(genomicsdbQuery))
 	fmt.Println("number of VariantCalls =", nVariantCalls)
 	sampleNames := make([]string, nVariantCalls)
 	chromosomes := make([]string, nVariantCalls)
 	var i, j C.uint64_t
-	var info C.info_t
+	var info C.genomicsdb_info_t
 	for i = 0; i < nVariantCalls; i++ {
-		sampleName := C.get_sample_name_at(genomicsdbQuery, i)
+		sampleName := C.genomicsdb_get_sample_name_at(genomicsdbQuery, i)
 		if sampleName != nil {
 			sampleNames[i] = C.GoString((*C.char)(unsafe.Pointer(sampleName)))
 		} else {
 			return false, df
 		}
-		chromosome := C.get_chromosome_at(genomicsdbQuery, i)
+		chromosome := C.genomicsdb_get_chromosome_at(genomicsdbQuery, i)
 		if chromosome != nil {
 			chromosomes[i] = C.GoString((*C.char)(unsafe.Pointer(chromosome)))
 		} else {
 			return false, df
 		}
 	}
-	positions := unsafe.Slice((*int)(unsafe.Pointer(C.get_positions(genomicsdbQuery))), nVariantCalls)
-	end_positions := unsafe.Slice((*int)(unsafe.Pointer(C.get_end_positions(genomicsdbQuery))), nVariantCalls)
+	positions := unsafe.Slice((*int)(unsafe.Pointer(C.genomicsdb_get_positions(genomicsdbQuery))), nVariantCalls)
+	end_positions := unsafe.Slice((*int)(unsafe.Pointer(C.genomicsdb_get_end_positions(genomicsdbQuery))), nVariantCalls)
 
 	genomicSeries[0] = series.New(sampleNames, series.String, "Sample")
 	genomicSeries[1] = series.New(chromosomes, series.String, "CHROM")
@@ -149,12 +149,12 @@ func constructDataFrame(genomicsdbQuery unsafe.Pointer) (bool, dataframe.DataFra
 	genomicSeries[3] = series.New(end_positions, series.Int, "END")
 
 	for i = 0; i < nGenomicFields; i++ {
-		if C.get_genomic_field_info(genomicsdbQuery, i, &info) == 1 {
+		if C.genomicsdb_get_genomic_field_info(genomicsdbQuery, i, &info) == 1 {
 			name := C.GoString(info.name)
 			if info.kind == 0 {
 				genomic_field := make([]string, nVariantCalls)
 				for j = 0; j < nVariantCalls; j++ {
-					string_field := C.get_genomic_string_field_at(genomicsdbQuery, info.name, j)
+					string_field := C.genomicsdb_get_genomic_string_field_at(genomicsdbQuery, info.name, j)
 					if string_field != nil {
 						genomic_field[j] = C.GoString((*C.char)(unsafe.Pointer(string_field)))
 					} else {
@@ -192,22 +192,22 @@ func GenomicsDBQuery(queryConfig GenomicsDBQueryConfig) (bool, string, dataframe
 	cBuf := (*[1 << 30]byte)(p)
 	copy(cBuf[:], data)
 
-	var status C.status_t
-	genomicsdbHandle := C.connect(p, len, &status)
+	var status C.genomicsdb_status_t
+	genomicsdbHandle := C.genomicsdb_connect(p, len, &status)
 	if status.succeeded == 0 || genomicsdbHandle == nil {
 		return false, fmt.Sprintln("Could not connect to GenomicsDB : ", C.GoString(&status.error_message[0])), df
 	}
 
-	genomicsdbQuery := C.query(genomicsdbHandle, &status)
+	genomicsdbQuery := C.genomicsdb_query(genomicsdbHandle, &status)
 	if status.succeeded == 0 || genomicsdbHandle == nil {
-		C.disconnect(genomicsdbHandle)
+		C.genomicsdb_disconnect(genomicsdbHandle)
 		return false, fmt.Sprintln("Could not setup GenomicsDB query: ", C.GoString(&status.error_message[0])), df
 	}
 
 	succeed, genomicsdb_df := constructDataFrame(genomicsdbQuery)
 
-	C.delete_query(genomicsdbQuery)
-	C.disconnect(genomicsdbHandle)
+	C.genomicsdb_delete_query(genomicsdbQuery)
+	C.genomicsdb_disconnect(genomicsdbHandle)
 
 	if !succeed {
 		return false, "Exception occurred while constructing data frame", df

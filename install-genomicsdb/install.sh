@@ -24,7 +24,8 @@
 # THE SOFTWARE.
 #
 
-GENOMICSDB_BRANCH=${GENOMICSDB_BRANCH:-master}
+GENOMICSDB_BRANCH=${GENOMICSDB_BRANCH:-develop}
+
 CMAKE_INSTALL_PREFIX=${GENOMICSDB_INSTALL_DIR:-/usr/local}
 GENOMICSDB_DIR=$(mktemp -d).GenomicsDB
 if [[ $CMAKE_INSTALL_PREFIX == "/usr/local" ]]; then
@@ -65,7 +66,7 @@ $SUDO rm -vf $CMAKE_INSTALL_PREFIX/lib/pkgconfig/genomicsdb.pc
 $SUDO rm -vfr $CMAKE_INSTALL_PREFIX/include/genomicsdb*
 echo "Removing old genomicsdb artifacts DONE"
 
-echo "Installing GenomicsDB into $CMAKE_INSTALL_PREFIX..."
+echo "Installing GenomicsDB from branch $GENOMICSDB_BRANCH into $CMAKE_INSTALL_PREFIX..."
 git clone https://github.com/GenomicsDB/GenomicsDB.git -b $GENOMICSDB_BRANCH $GENOMICSDB_DIR
 
 pushd $GENOMICSDB_DIR

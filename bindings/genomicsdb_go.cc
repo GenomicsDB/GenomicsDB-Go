@@ -169,12 +169,12 @@ class VariantCallProcessor : public GenomicsDBVariantCallProcessor {
   bool m_is_initialized = false;
 };
 
-const char *version() {
+const char *genomicsdb_version() {
   static std::string version = genomicsdb::version();
   return version.c_str();
 }
 
-void *connect(void *pb_string, size_t len, status_t *status) {
+void *genomicsdb_connect(void *pb_string, size_t len, genomicsdb_status_t *status) {
   time_t start = time(0);
   void *genomicsdb = 0;
   try {
@@ -189,7 +189,7 @@ void *connect(void *pb_string, size_t len, status_t *status) {
   return genomicsdb;
 }
 
-void *query(void *genomicsdb_handle, status_t *status) {
+void *genomicsdb_query(void *genomicsdb_handle, genomicsdb_status_t *status) {
   VariantCallProcessor *variant_call_processor = 0;
   try {
     status->succeeded = 1;
@@ -204,11 +204,11 @@ void *query(void *genomicsdb_handle, status_t *status) {
 
 #define VARIANT_CALL_PROCESSOR ((VariantCallProcessor *)query_processor)
 
-uint64_t get_count(void *query_processor) {
+uint64_t genomicsdb_get_count(void *query_processor) {
   return ((VariantCallProcessor *)query_processor)->count();
 }
 
-char *get_sample_name_at(void *query_processor, uint64_t index) {
+char *genomicsdb_get_sample_name_at(void *query_processor, uint64_t index) {
   if (index < VARIANT_CALL_PROCESSOR->m_sample_names.size()) {
     auto& sample_names = VARIANT_CALL_PROCESSOR->m_sample_names;
     return const_cast<char *>(sample_names[index].c_str());
@@ -216,7 +216,7 @@ char *get_sample_name_at(void *query_processor, uint64_t index) {
   return 0;
 }
 
-char *get_chromosome_at(void *query_processor, uint64_t index) {
+char *genomicsdb_get_chromosome_at(void *query_processor, uint64_t index) {
   if (index < VARIANT_CALL_PROCESSOR->m_sample_names.size()) {
     auto& chrom = VARIANT_CALL_PROCESSOR->m_chrom;
     return const_cast<char *>(chrom[index].c_str());
@@ -224,21 +224,21 @@ char *get_chromosome_at(void *query_processor, uint64_t index) {
   return 0;
 }
 
-int64_t *get_positions(void *query_processor) {
+int64_t *genomicsdb_get_positions(void *query_processor) {
   auto& pos = VARIANT_CALL_PROCESSOR->m_pos;
   return &pos[0];
 }
 
-int64_t *get_end_positions(void *query_processor) {
+int64_t *genomicsdb_get_end_positions(void *query_processor) {
   auto& end = VARIANT_CALL_PROCESSOR->m_end;
   return &end[0];
 }
 
-uint64_t get_genomic_field_count(void *query_processor) {
+uint64_t genomicsdb_get_genomic_field_count(void *query_processor) {
   return VARIANT_CALL_PROCESSOR->m_field_names.size();
 }
 
-int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info) {
+int genomicsdb_get_genomic_field_info(void *query_processor, uint64_t index, genomicsdb_info_t *info) {
   int found = 1;
   auto& field_name = VARIANT_CALL_PROCESSOR->m_field_names[index];
   info->name = &field_name[0];
@@ -259,7 +259,7 @@ int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info) 
   return found;
 }
 
-char *get_genomic_string_field_at(void *query_processor, char *field_name, uint64_t index) {
+char *genomicsdb_get_genomic_string_field_at(void *query_processor, char *field_name, uint64_t index) {
   if (index <  VARIANT_CALL_PROCESSOR->m_string_fields[field_name].size()) {
     auto& string_field = VARIANT_CALL_PROCESSOR->m_string_fields[field_name];
     return const_cast<char *>(string_field[index].c_str());
@@ -267,10 +267,10 @@ char *get_genomic_string_field_at(void *query_processor, char *field_name, uint6
   return 0;
 }
 
-void delete_query(void *query_processor) {
+void genomicsdb_delete_query(void *query_processor) {
   delete (VariantCallProcessor *)query_processor;
 }
 
-void disconnect(void *genomicsdb) {
+void genomicsdb_disconnect(void *genomicsdb) {
   delete (GenomicsDB *)genomicsdb;
 }
