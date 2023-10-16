@@ -33,38 +33,38 @@
 extern "C" {
 #endif
 
-  const char *version();
+  const char *genomicsdb_version();
 
 #define PATH_MAX 4095
-  typedef struct status_t{
+  typedef struct genomicsdb_status_t{
     int succeeded;
     char error_message[PATH_MAX+1];
-  } status_t;
+  } genomicsdb_status_t;
 
-  typedef struct info_t{
+  typedef struct genomicsdb_info_t{
     int kind; //strings=0/ints=1/floats=2
     char *name;
     void *ptr;
-  } info_t;
+  } genomicsdb_info_t;
 
-  void *connect(void *pb_string, size_t len, status_t *status);
+  void *genomicsdb_connect(void *pb_string, size_t len, genomicsdb_status_t *status);
 
-  void *query(void *genomicsdb_handle, status_t *status);
+  void *genomicsdb_query(void *genomicsdb_handle, genomicsdb_status_t *status);
 
-  uint64_t get_count(void *query_processor);
+  uint64_t genomicsdb_get_count(void *query_processor);
 
-  char *get_sample_name_at(void *query_processor, uint64_t index);
-  char *get_chromosome_at(void *query_processor, uint64_t index);
-  int64_t *get_positions(void *query_processor);
-  int64_t *get_end_positions(void *query_processor);
+  char *genomicsdb_get_sample_name_at(void *query_processor, uint64_t index);
+  char *genomicsdb_get_chromosome_at(void *query_processor, uint64_t index);
+  int64_t *genomicsdb_get_positions(void *query_processor);
+  int64_t *genomicsdb_get_end_positions(void *query_processor);
 
-  uint64_t get_genomic_field_count(void *query_processor);
-  int get_genomic_field_info(void *query_processor, uint64_t index, info_t *info_t);
-  char *get_genomic_string_field_at(void *query_processor, char *field_name, uint64_t index);
+  uint64_t genomicsdb_get_genomic_field_count(void *query_processor);
+  int genomicsdb_get_genomic_field_info(void *query_processor, uint64_t index, genomicsdb_info_t *info_t);
+  char *genomicsdb_get_genomic_string_field_at(void *query_processor, char *field_name, uint64_t index);
   
-  void delete_query(void *query_processor);
+  void genomicsdb_delete_query(void *query_processor);
 
-  void disconnect(void *genomicsdb);
+  void genomicsdb_disconnect(void *genomicsdb);
 
 #ifdef __cplusplus
 }
