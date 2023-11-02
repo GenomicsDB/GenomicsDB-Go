@@ -79,6 +79,8 @@ if [[ $(uname) == "Darwin" ]]; then
   export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
   # Use the uuid from framework
   brew list ossp-uuid &> /dev/null && brew uninstall ossp-uuid
+  brew list automake &> /dev/null || brew install automake
+  brew list pkg-config &> /dev/null || brew install pkg-config
 else
   PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh $SUDO scripts/prereqs/install_prereqs.sh
 fi
