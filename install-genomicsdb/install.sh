@@ -73,7 +73,12 @@ pushd $GENOMICSDB_DIR
 
 echo "Installing prerequisites on System=$(uname)..."
 if [[ $(uname) == "Darwin" ]]; then
-  PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh scripts/prereqs/install_prereqs.sh
+  HOMEBREW_NO_AUTO_UPDATE=1
+  HOMEBREW_NO_INSTALL_CLEANUP=1
+  brew list openssl@3 &> /dev/null || brew install openssl@3
+  export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+  # Use the uuid from framework
+  brew list ossp-uuid &> /dev/null && brew uninstall ossp-uuid
 else
   PREREQS_ENV=$GENOMICSDB_DIR/prereqs.sh $SUDO scripts/prereqs/install_prereqs.sh
 fi
@@ -110,9 +115,15 @@ fi
 $SUDO rm -fr $CMAKE_INSTALL_PREFIX/genomicsdb
 
 if [[ $(uname) == "Darwin" ]]; then
-  echo "export DYLD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$DYLD_LIBRARY_PATH" > genomicsdb.env
-else
+  if [[ -n $DYLD_FALLBACK_LIBRARY_PATH ]]; then
+    echo "export DYLD_FALLBACK_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$DYLD_FALLBACK_LIBRARY_PATH" > genomicsdb.env
+  else
+    echo "export DYLD_FALLBACK_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
+  fi
+elif [[ -n $LD_LIBRARY_PATH ]]; then
   echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH" > genomicsdb.env
+else
+  echo "export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib" > genomicsdb.env
 fi
 
 if [[ -f $CMAKE_INSTALL_PREFIX/lib/pkgconfig/genomicsdb.pc ]]; then

@@ -27,6 +27,9 @@
 package bindings
 
 // #cgo pkg-config: genomicsdb
+// #if defined(__APPLE__)
+// #cgo LDFLAGS: -Wl,-rpath,/usr/local/lib
+// #endif
 // #cgo CXXFLAGS: -std=c++14
 // #include <genomicsdb_go.h>
 // #include <stdlib.h>
