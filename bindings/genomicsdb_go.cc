@@ -194,7 +194,7 @@ void *genomicsdb_query(void *genomicsdb_handle, genomicsdb_status_t *status) {
   try {
     status->succeeded = 1;
     variant_call_processor = new VariantCallProcessor();
-    ((GenomicsDB *)genomicsdb_handle)->query_variant_calls(*variant_call_processor);
+    ((GenomicsDB *)genomicsdb_handle)->query_variant_calls(*variant_call_processor, "", GenomicsDB::NONE);
   } catch (const std::exception &e) {
     status->succeeded = 0;
     strncpy(&status->error_message[0], e.what(), PATH_MAX);
